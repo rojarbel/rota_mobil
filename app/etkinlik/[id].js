@@ -12,6 +12,7 @@ import axiosClient from '../../src/api/axiosClient';
 import { Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { KeyboardAvoidingView } from 'react-native';
+import ReplyInput from '../../src/components/YorumCard';
 
 const PRIMARY = '#7B2CBF';
 const ACCENT = '#FFD54F';
@@ -217,43 +218,14 @@ useEffect(() => {
                 </TouchableOpacity>
               </View> 
             </View>
-<View style={{ marginTop: 8, display: String(yanitId) === String(yorum._id) ? 'flex' : 'none' }}>
-  <TextInput
-    ref={inputRef}
-    value={yanitlar[yorum._id] || ''}
-    onChangeText={text => {
-      if (yanitlar[yorum._id] !== text) {
-        setYanitlar(prev => ({ ...prev, [yorum._id]: text }));
-      }
-    }}
-    placeholder="Yanıtınızı yazın..."
-    multiline
-    scrollEnabled
-    blurOnSubmit={false}
-    style={{
-      borderWidth: 1,
-      borderColor: '#ccc',
-      borderRadius: 8,
-      padding: 10,
-      minHeight: 60,
-    }}
-  />
-  <TouchableOpacity
-    onPress={() => yanitGonder(yorum._id)}
-    style={{
-      backgroundColor: PRIMARY,
-      borderRadius: 8,
-      paddingVertical: 10,
-      marginTop: 10,
-      alignSelf: 'flex-end',
-      width: 100,
-    }}
-  >
-    <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600' }}>
-      Yanıtla
-    </Text>
-  </TouchableOpacity>
-</View>
+            <ReplyInput
+              yorum={yorum}
+              yanitId={yanitId}
+              setYanitId={setYanitId}
+              yanitlar={yanitlar}
+              setYanitlar={setYanitlar}
+              yanitGonder={yanitGonder}
+            />
 
 
 
