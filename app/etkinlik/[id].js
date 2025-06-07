@@ -17,6 +17,7 @@ import CommentCard from '../../src/components/CommentCard';
 const PRIMARY = '#7B2CBF';
 const ACCENT = '#FFD54F';
 const TEXT = '#333';
+const backendURL = 'https://rotabackend-f4gqewcbfcfud4ac.qatarcentral-01.azurewebsites.net';
 
 export default function EtkinlikDetay() {
   const navigation = useNavigation();
@@ -42,8 +43,20 @@ export default function EtkinlikDetay() {
     const fetchFavorileyenler = async () => {
       try {
         const { data } = await axiosClient.get(`/etkinlik/${etkinlik.id}/favorileyenler`);
-        setFavorileyenler(data.users || []);
-        setFavoriSayisi(data.toplam || 0);
+        let users = data.users || [];
+        users = await Promise.all(
+          users.map(async (u) => {
+            if (u.image || u.avatarUrl) return u;
+            try {
+              const { data: info } = await axiosClient.get(`/users/${u.id}`);
+              return { ...u, image: info.image || info.avatarUrl };
+            } catch {
+              return u;
+            }
+          })
+        );
+        setFavorileyenler(users);
+        setFavoriSayisi(data.toplam || users.length);
       } catch {
         setFavorileyenler([]);
         setFavoriSayisi(0);
@@ -240,7 +253,7 @@ export default function EtkinlikDetay() {
     return <Text style={{ textAlign: 'center', marginTop: 20 }}>Etkinlik yükleniyor...</Text>;
   }
 
-const backendURL = 'https://rotabackend-f4gqewcbfcfud4ac.qatarcentral-01.azurewebsites.net';
+
 const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${backendURL}${etkinlik.gorsel}`;
 
   return (
@@ -400,12 +413,10 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
           <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12, color: TEXT }}>Favoriye Ekleyenler</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {favorileyenler.slice(0, 6).map(user => {
-              const avatar =
-                (user.avatarUrl && user.avatarUrl.trim() !== '')
-                  ? user.avatarUrl
-                  : (user.image && user.image.trim() !== '')
-                    ? user.image
-                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.kullanici || user.username || 'Kullanıcı')}`;
+              const raw = user.avatarUrl || user.image || user.avatar || '';
+              const avatar = raw && raw.trim() !== ''
+                ? (raw.startsWith('http') ? raw : `${backendURL}${raw}`)
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.kullanici || user.username || 'Kullanıcı')}`;
 
               return (
                 <Image
@@ -498,15 +509,19 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
             <View style={{ width: '85%', maxHeight: '70%', backgroundColor: '#fff', borderRadius: 12, padding: 16 }}>
               <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 12, color: TEXT }}>Tüm Favorileyenler</Text>
               <ScrollView>
-                {favorileyenler.map(user => (
-                  <View key={user.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                                        <Image
-                      source={{ uri: user.avatarUrl || user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.kullanici || user.username)}` }}
-                      style={{ width: 40, height: 40, borderRadius: 20, marginRight: 12 }}
-                    />
-                    <Text style={{ fontSize: 16 }}>{user.kullanici}</Text>
-                  </View>
-                ))}
+                {favorileyenler.map(user => {
+                  const raw = user.avatarUrl || user.image || user.avatar || '';
+                  const avatar = raw && raw.trim() !== '' ? (raw.startsWith('http') ? raw : `${backendURL}${raw}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.kullanici || user.username)}`;
+                  return (
+                    <View key={user.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                      <Image
+                        source={{ uri: avatar }}
+                        style={{ width: 40, height: 40, borderRadius: 20, marginRight: 12 }}
+                      />
+                      <Text style={{ fontSize: 16 }}>{user.kullanici}</Text>
+                    </View>
+                  );
+                })}
               </ScrollView>
               <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginTop: 12, backgroundColor: PRIMARY, borderRadius: 8, paddingVertical: 10 }}>
                 <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600' }}>Kapat</Text>
