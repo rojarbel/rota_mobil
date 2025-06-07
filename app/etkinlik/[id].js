@@ -509,6 +509,8 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
             <View style={{ width: '85%', maxHeight: '70%', backgroundColor: '#fff', borderRadius: 12, padding: 16 }}>
               <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 12, color: TEXT }}>Tüm Favorileyenler</Text>
               <ScrollView>
+
+              
                 {favorileyenler.map(user => {
                   const raw = user.avatarUrl || user.image || user.avatar || '';
                   const avatar = raw && raw.trim() !== '' ? (raw.startsWith('http') ? raw : `${backendURL}${raw}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.kullanici || user.username)}`;
