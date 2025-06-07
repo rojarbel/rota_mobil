@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import axiosClient from "../src/api/axiosClient";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 
@@ -10,12 +10,20 @@ const ACCENT = '#FFD54F';
 const TEXT = '#333';
 
 const RegisterScreen = () => {
+  const params = useLocalSearchParams();
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(params.email || "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const isGoogleUser = !!params.email;
+
+  useEffect(() => {
+    if (params.email && params.name) {
+      Alert.alert("Google Kullanıcısı", `${params.name} olarak kayıt oluyorsunuz.`);
+    }
+  }, [params]);
 
   const handleSubmit = async () => {
     if (password !== confirmPassword) {
@@ -55,9 +63,10 @@ const RegisterScreen = () => {
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, isGoogleUser && { backgroundColor: '#eee' }]}
           placeholder="E-posta"
           value={email}
+          editable={!isGoogleUser}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
