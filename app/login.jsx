@@ -23,12 +23,13 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '818824564698-58vpa2gmaci887t5b9nr9kqqjls2udbd.apps.googleusercontent.com',
-    expoClientId: '818824564698-58vpa2gmaci887t5b9nr9kqqjls2udbd.apps.googleusercontent.com',
-    scopes: ['profile', 'email'],
-    redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
-  });
+const [request, response, promptAsync] = Google.useAuthRequest({
+  clientId: '818824564698-58vpa2gmaci887t5b9nr9kqqjls2udbd.apps.googleusercontent.com',
+  androidClientId: '818824564698-58vpa2gmaci887t5b9nr9kqqjls2udbd.apps.googleusercontent.com',
+  iosClientId: '818824564698-58vpa2gmaci887t5b9nr9kqqjls2udbd.apps.googleusercontent.com',
+  scopes: ['profile', 'email'],
+  redirectUri: AuthSession.makeRedirectUri({ native: 'com.googleusercontent.apps.818824564698-58vpa2gmaci887t5b9nr9kqqjls2udbd:/oauth2redirect' }),
+});
 
   useEffect(() => {
     if (response?.type === 'success') {
