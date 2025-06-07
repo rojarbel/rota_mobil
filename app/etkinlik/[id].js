@@ -38,30 +38,32 @@ export default function EtkinlikDetay() {
   const [yanitId, setYanitId] = useState(null);
   const [yanitlar, setYanitlar] = useState({});
 
-  useEffect(() => {
+  const fetchFavorileyenler = async () => {
     if (!etkinlik) return;
-    const fetchFavorileyenler = async () => {
-      try {
-        const { data } = await axiosClient.get(`/etkinlik/${etkinlik.id}/favorileyenler`);
-        let users = data.users || [];
-        users = await Promise.all(
-          users.map(async (u) => {
-            if (u.image || u.avatarUrl) return u;
-            try {
-              const { data: info } = await axiosClient.get(`/users/${u.id}`);
-              return { ...u, image: info.image || info.avatarUrl };
-            } catch {
-              return u;
-            }
-          })
-        );
-        setFavorileyenler(users);
-        setFavoriSayisi(data.toplam || users.length);
-      } catch {
-        setFavorileyenler([]);
-        setFavoriSayisi(0);
-      }
-    };
+
+    try {
+      const { data } = await axiosClient.get(`/etkinlik/${etkinlik.id}/favorileyenler`);
+      let users = data.users || [];
+      users = await Promise.all(
+        users.map(async (u) => {
+          if (u.image || u.avatarUrl) return u;
+          try {
+            const { data: info } = await axiosClient.get(`/users/${u.id}`);
+            return { ...u, image: info.image || info.avatarUrl };
+          } catch {
+            return u;
+          }
+        })
+      );
+      setFavorileyenler(users);
+      setFavoriSayisi(data.toplam || users.length);
+    } catch {
+      setFavorileyenler([]);
+      setFavoriSayisi(0);
+    }
+  };
+
+  useEffect(() => {
     fetchFavorileyenler();
   }, [etkinlik]);
 
@@ -203,9 +205,7 @@ export default function EtkinlikDetay() {
       await AsyncStorage.setItem('favoriler', JSON.stringify(guncelFavoriler));
       setFavorideMi(!favorideMi);
 
-      const { data } = await axiosClient.get(`/etkinlik/${etkinlik.id}/favorileyenler`);
-      setFavorileyenler(data.users || []);
-      setFavoriSayisi(data.toplam || 0);
+      await fetchFavorileyenler();
     } catch (err) {
       Alert.alert("Hata", "Favori işlemi başarısız oldu.");
     }
@@ -510,7 +510,7 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
               <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 12, color: TEXT }}>Tüm Favorileyenler</Text>
               <ScrollView>
 
-              
+
                 {favorileyenler.map(user => {
                   const raw = user.avatarUrl || user.image || user.avatar || '';
                   const avatar = raw && raw.trim() !== '' ? (raw.startsWith('http') ? raw : `${backendURL}${raw}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.kullanici || user.username)}`;
