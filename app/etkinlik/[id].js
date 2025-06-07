@@ -1,0 +1,659 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import { useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState, useRef } from 'react';
+import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View, Platform } from 'react-native';
+import { useContext } from 'react';
+import { AuthContext } from '../../src/context/AuthContext';
+import { router } from 'expo-router';
+import FastImage from 'expo-fast-image';
+import axiosClient from '../../src/api/axiosClient';
+import { Linking } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import { KeyboardAvoidingView } from 'react-native';
+
+const PRIMARY = '#7B2CBF';
+const ACCENT = '#FFD54F';
+const TEXT = '#333';
+
+export default function EtkinlikDetay() {
+  const navigation = useNavigation();
+  const { id } = useLocalSearchParams();
+  const scrollViewRef = useRef(null);
+
+  const getYanitlar = (parentId) => yorumlar.filter(y => y.ustYorumId === parentId);
+
+  const [etkinlik, setEtkinlik] = useState(null);
+  const [favorideMi, setFavorideMi] = useState(false);
+  const auth = useContext(AuthContext);
+  const isAdmin = auth?.role?.toLowerCase() === 'admin';
+  const [yorumlar, setYorumlar] = useState([]);
+  const [favorileyenler, setFavorileyenler] = useState([]);
+  const [favoriSayisi, setFavoriSayisi] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [yeniYorum, setYeniYorum] = useState("");
+  const [yanitId, setYanitId] = useState(null);
+  const [yanitlar, setYanitlar] = useState({});
+
+  useEffect(() => {
+    if (!etkinlik) return;
+    const fetchFavorileyenler = async () => {
+      try {
+        const { data } = await axiosClient.get(`/etkinlik/${etkinlik.id}/favorileyenler`);
+        setFavorileyenler(data.users || []);
+        setFavoriSayisi(data.toplam || 0);
+      } catch {
+        setFavorileyenler([]);
+        setFavoriSayisi(0);
+      }
+    };
+    fetchFavorileyenler();
+  }, [etkinlik]);
+
+  const paylaş = async (tip) => {
+    const url = `https://rota.app/etkinlik/${etkinlik.id}`;
+    const mesaj = `${etkinlik.baslik} - ${etkinlik.tarih}\n${url}`;
+
+
+    try {
+      switch (tip) {
+        case "instagram":
+          await Linking.openURL(`https://www.instagram.com/?url=${encodeURIComponent(url)}`);
+          break;
+        case "facebook":
+          await Linking.openURL(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`);
+          break;
+        case "twitter":
+          await Linking.openURL(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(etkinlik.baslik)}`);
+          break;
+        case "whatsapp":
+          await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(mesaj)}`);
+          break;
+        case "email":
+          await Linking.openURL(`mailto:?subject=${encodeURIComponent(etkinlik.baslik)}&body=${encodeURIComponent(mesaj)}`);
+          break;
+        case "kopyala":
+          await Clipboard.setStringAsync(url);
+          Alert.alert("Kopyalandı", "Bağlantı panoya kopyalandı");
+          break;
+        default:
+          Alert.alert("Paylaşım başarısız", "Geçersiz paylaşım tipi");
+          break;
+      }
+    } catch (err) {
+      Alert.alert("Hata", "Paylaşım gerçekleştirilemedi.");
+    }
+  };
+
+  const zamanFarki = (tarih) => {
+    const simdi = new Date();
+    const yorumTarihi = new Date(tarih);
+    const saniye = Math.floor((simdi - yorumTarihi) / 1000);
+    if (saniye < 60) return `${saniye} sn önce`;
+    const dakika = Math.floor(saniye / 60);
+    if (dakika < 60) return `${dakika} dk önce`;
+    const saat = Math.floor(dakika / 60);
+    if (saat < 24) return `${saat} sa önce`;
+    const gun = Math.floor(saat / 24);
+    return `${gun} gün önce`;
+  };
+
+  const yanitGonder = async (yorumId) => {
+    const metin = yanitlar[yorumId]?.trim();
+    if (!metin) return;
+
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const image = await AsyncStorage.getItem('image');
+
+      const { data } = await axiosClient.post('/yorum', {
+        etkinlikId: etkinlik.id,
+        yorum: metin,
+        yanitId: yorumId,
+        avatarUrl: image,
+      });
+
+      setYorumlar(prev => [...prev, data]);
+      setYanitlar(prev => ({ ...prev, [yorumId]: '' }));
+      setYanitId(null);
+    } catch (err) {
+      Alert.alert("Hata", "Yanıt gönderilemedi.");
+    }
+  };
+
+  const touchableIcon = (liked, onPress, count, tarih) => (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <TouchableOpacity onPress={onPress}>
+        <Text style={{ fontSize: 18 }}>{liked ? '💜' : '🤍'}</Text>
+      </TouchableOpacity>
+      <Text style={{ fontSize: 12, color: '#888' }}>{count}</Text>
+      <Text style={{ fontSize: 12, color: '#aaa' }}>· {zamanFarki(tarih)}</Text>
+    </View>
+  );
+
+  const YorumCard = ({ yorum, level = 0 }) => {
+    const inputRef = useRef(null);
+
+useEffect(() => {
+  if (yanitId !== yorum._id) return;
+  const timeout = setTimeout(() => {
+    if (inputRef.current?.isFocused?.() === false) {
+      inputRef.current.focus();
+    }
+  }, 100);
+  return () => clearTimeout(timeout);
+}, [yanitId]);
+
+    const altYorumlar = getYanitlar(yorum._id);
+    const isAltYorum = level === 1;
+    const isUser = auth?.userId === yorum.kullaniciId?.toString();
+
+    const [duzenleModu, setDuzenleModu] = useState(false);
+    const [duzenlenenMetin, setDuzenlenenMetin] = useState(yorum.yorum);
+
+    const yorumuGuncelle = async () => {
+      try {
+        const { data } = await axiosClient.put(`/yorum/${yorum._id}`, {
+          yorum: duzenlenenMetin,
+        });
+        setYorumlar(prev => prev.map(y => (y._id === yorum._id ? data : y)));
+        setDuzenleModu(false);
+      } catch {
+        Alert.alert("Hata", "Yorum güncellenemedi");
+      }
+    };
+
+    const yorumuSil = async () => {
+      Alert.alert("Yorum silinsin mi?", "Bu işlem geri alınamaz", [
+        { text: "İptal", style: "cancel" },
+        {
+          text: "Sil", style: "destructive", onPress: async () => {
+            try {
+              await axiosClient.delete(`/yorum/${yorum._id}`);
+              setYorumlar(prev => prev.filter(y => y._id !== yorum._id));
+            } catch {
+              Alert.alert("Hata", "Silme başarısız");
+            }
+          },
+        },
+      ]);
+    };
+
+    return (
+      <View key={yorum._id} style={{ marginBottom: 12 }}>
+        <View style={{ flexDirection: 'row', paddingLeft: isAltYorum ? 48 : 0 }}>
+          <Image source={{ uri: yorum.avatarUrl }} style={{ width: 40, height: 40, borderRadius: 20, marginRight: 10 }} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: '600' }}>{yorum.kullanici}</Text>
+
+            {duzenleModu ? (
+              <>
+                <TextInput
+                  value={duzenlenenMetin}
+                  onChangeText={setDuzenlenenMetin}
+                  style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, marginVertical: 4 }}
+                  multiline
+                />
+                <TouchableOpacity onPress={yorumuGuncelle} style={{ backgroundColor: PRIMARY, padding: 6, borderRadius: 6 }}>
+                  <Text style={{ color: '#fff' }}>Kaydet</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <Text style={{ color: '#555', marginVertical: 4 }}>{yorum.yorum}</Text>
+            )}
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              {touchableIcon(yorum.begendinMi, async () => {
+                try {
+                  const { data: updated } = await axiosClient.put(`/yorum/begen/${yorum._id}`);
+                  setYorumlar(prev => prev.map(item => (item._id === updated._id ? updated : item)));
+                } catch {}
+              }, yorum.begeni || 0, yorum.tarih)}
+
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity onPress={() => setYanitId(yorum._id)}>
+                  <Text style={{ color: PRIMARY }}>Yanıtla</Text>
+                </TouchableOpacity>
+              </View> 
+            </View>
+<View style={{ marginTop: 8, display: String(yanitId) === String(yorum._id) ? 'flex' : 'none' }}>
+  <TextInput
+    ref={inputRef}
+    value={yanitlar[yorum._id] || ''}
+    onChangeText={text => {
+      if (yanitlar[yorum._id] !== text) {
+        setYanitlar(prev => ({ ...prev, [yorum._id]: text }));
+      }
+    }}
+    placeholder="Yanıtınızı yazın..."
+    multiline
+    scrollEnabled
+    blurOnSubmit={false}
+    style={{
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 8,
+      padding: 10,
+      minHeight: 60,
+    }}
+  />
+  <TouchableOpacity
+    onPress={() => yanitGonder(yorum._id)}
+    style={{
+      backgroundColor: PRIMARY,
+      borderRadius: 8,
+      paddingVertical: 10,
+      marginTop: 10,
+      alignSelf: 'flex-end',
+      width: 100,
+    }}
+  >
+    <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600' }}>
+      Yanıtla
+    </Text>
+  </TouchableOpacity>
+</View>
+
+
+
+
+
+
+
+          </View>
+        </View>
+        {altYorumlar.map(alt => (
+          <YorumCard key={alt._id} yorum={alt} level={1} />
+        ))}
+      </View>
+    );
+  };
+
+  useEffect(() => {
+    const yorumlariGetir = async () => {
+      try {
+        const { data } = await axiosClient.get(`/yorum/${id}`);
+        setYorumlar(data);
+      } catch (err) {
+        console.log('Yorumlar alınamadı', err);
+      }
+    };
+    if (etkinlik) yorumlariGetir();
+  }, [etkinlik]);
+
+  const yorumGonder = async () => {
+    if (!yeniYorum.trim()) return;
+
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const image = await AsyncStorage.getItem('image');
+      const { data } = await axiosClient.post('/yorum', {
+        etkinlikId: etkinlik.id,
+        yorum: yeniYorum,
+        avatarUrl: image,
+      });
+
+      setYorumlar(prev => [data, ...prev]);
+      setYeniYorum("");
+    } catch (err) {
+      Alert.alert("Hata", "Yorum gönderilemedi.");
+    }
+  };
+
+  useEffect(() => {
+    const fetchEtkinlik = async () => {
+      try {
+        const { data } = await axiosClient.get(`/etkinlik/${id}`);
+
+        if (data._id && !data.id) data.id = data._id;
+        setEtkinlik(data);
+      } catch (err) {
+        console.error('Etkinlik verisi alınamadı', err);
+      }
+    };
+    fetchEtkinlik();
+  }, [id]);
+
+  useEffect(() => {
+    const checkFavori = async () => {
+      const favoriler = JSON.parse(await AsyncStorage.getItem('favoriler')) || [];
+      const varMi = favoriler.find(e => e.id === etkinlik?.id);
+      setFavorideMi(!!varMi);
+    };
+    if (etkinlik) checkFavori();
+  }, [etkinlik]);
+
+  const favoriToggle = async () => {
+    const token = await AsyncStorage.getItem('accessToken');
+    if (!token) {
+      router.replace('/login');
+      return;
+    }
+
+    try {
+      const favoriler = JSON.parse(await AsyncStorage.getItem('favoriler')) || [];
+      let guncelFavoriler = [...favoriler];
+
+      if (favorideMi) {
+        await axiosClient.delete(`/etkinlik/favori/${etkinlik.id}`);
+        guncelFavoriler = favoriler.filter(e => e.id !== etkinlik.id);
+      } else {
+        await axiosClient.post('/etkinlik/favori', { etkinlikId: etkinlik.id });
+        guncelFavoriler.push(etkinlik);
+      }
+
+      await AsyncStorage.setItem('favoriler', JSON.stringify(guncelFavoriler));
+      setFavorideMi(!favorideMi);
+
+      const { data } = await axiosClient.get(`/etkinlik/${etkinlik.id}/favorileyenler`);
+      setFavorileyenler(data.users || []);
+      setFavoriSayisi(data.toplam || 0);
+    } catch (err) {
+      Alert.alert("Hata", "Favori işlemi başarısız oldu.");
+    }
+  };
+
+  const checkFavori = async () => {
+    try {
+      const favoriler = JSON.parse(await AsyncStorage.getItem('favoriler')) || [];
+      const varMi = favoriler.find(e => e.id === etkinlik?.id);
+
+      if (varMi) {
+        setFavorideMi(true);
+      } else {
+        const { data } = await axiosClient.get(`/etkinlik/${etkinlik.id}/favorileyenler`);
+        const mevcut = data.users?.some(u => u.id === auth.userId);
+        setFavorideMi(mevcut);
+      }
+    } catch {
+      setFavorideMi(false);
+    }
+  };
+
+  const etkinlikSil = async () => {
+    Alert.alert('Sil?', 'Etkinliği silmek istiyor musun?', [
+      {
+        text: 'İptal', style: 'cancel'
+      },
+      {
+        text: 'Sil', style: 'destructive', onPress: async () => {
+          try {
+            const token = await AsyncStorage.getItem('accessToken');
+            await axiosClient.delete(`/etkinlik/${etkinlik.id}`);
+
+            Alert.alert('Silindi', 'Etkinlik silindi.');
+            navigation.navigate('AnaSayfa');
+          } catch (err) {
+            Alert.alert('Hata', 'Silme başarısız.');
+          }
+        }
+      }
+    ]);
+  };
+
+  if (!etkinlik) {
+    return <Text style={{ textAlign: 'center', marginTop: 20 }}>Etkinlik yükleniyor...</Text>;
+  }
+
+const backendURL = 'https://rotabackend-f4gqewcbfcfud4ac.qatarcentral-01.azurewebsites.net';
+const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${backendURL}${etkinlik.gorsel}`;
+
+  return (
+<KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+  style={{ flex: 1 }}
+  keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+>
+<ScrollView
+  ref={scrollViewRef}
+  keyboardShouldPersistTaps="handled"
+  keyboardDismissMode="interactive"
+  contentInsetAdjustmentBehavior="automatic"
+  contentContainerStyle={{
+    padding: 16,
+    paddingBottom: 200,
+    backgroundColor: '#f2f2f2' // AÇIK GRİ ARKA PLAN
+  }}
+>
+        <FastImage
+          uri={gorselSrc}
+          cacheKey={etkinlik.id}
+          style={{
+            width: '100%',
+            height: 330,
+            borderRadius: 16,
+            marginTop: 12,
+            shadowColor: '#000',
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 3,
+          }}
+        />
+
+        <View style={{ marginTop: 20, backgroundColor: '#fff', borderRadius: 12, padding: 16 }}>
+          <Text style={{ fontSize: 22, fontWeight: '700', color: TEXT, marginBottom: 4 }}>
+            {etkinlik.baslik}
+          </Text>
+          <Text style={{ color: '#666', marginBottom: 2 }}>📂 {etkinlik.kategori}</Text>
+          <Text style={{ color: '#666', marginBottom: 2 }}>🏷️ {etkinlik.tur}</Text>
+          <Text style={{ color: '#666', marginBottom: 2 }}>📍 {etkinlik.sehir}</Text>
+          <Text style={{ color: '#666', marginBottom: 2 }}>📅 {etkinlik.tarih}</Text>
+          <Text style={{ color: PRIMARY, fontWeight: '600' }}>
+            💰 {(etkinlik.fiyat && etkinlik.fiyat !== '0') ? `${etkinlik.fiyat} ₺` : 'Ücretsiz'}
+          </Text>
+
+          <TouchableOpacity
+            onPress={favoriToggle}
+            style={{
+              marginTop: 20,
+              paddingVertical: 12,
+              borderRadius: 8,
+              backgroundColor: favorideMi ? '#f8f4ff' : '#fff',
+              borderWidth: 1,
+              borderColor: PRIMARY,
+            }}
+          >
+            <Text style={{ textAlign: 'center', color: PRIMARY, fontWeight: '600' }}>
+              {favorideMi ? 'Favoriden Çıkar' : 'Favorilere Ekle'}
+            </Text>
+          </TouchableOpacity>
+
+          {isAdmin && (
+            <View style={{ marginTop: 24, gap: 12 }}>
+              <TouchableOpacity
+                onPress={async () => {
+                  const token = await AsyncStorage.getItem('accessToken');
+                  router.push({
+                    pathname: '/admin/duzenle',
+                    params: { ...etkinlik, token },
+                  });
+                }}
+                style={{
+                  backgroundColor: '#00cec9',
+                  paddingVertical: 14,
+                  borderRadius: 10,
+                  shadowColor: '#000',
+                  shadowOpacity: 0.08,
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <Text style={{ color: '#fff', fontSize: 15, fontWeight: '600', textAlign: 'center' }}>
+                  ✏️ Etkinliği Düzenle
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={etkinlikSil}
+                style={{
+                  backgroundColor: '#d63031',
+                  paddingVertical: 14,
+                  borderRadius: 10,
+                  shadowColor: '#000',
+                  shadowOpacity: 0.08,
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <Text style={{ color: '#fff', fontSize: 15, fontWeight: '600', textAlign: 'center' }}>
+                  🗑️ Etkinliği Sil
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <View
+            style={{
+              marginTop: 16,
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: 18,
+            }}
+          >
+            {[
+              { tip: 'instagram', icon: '📸' },
+              { tip: 'facebook', icon: '📘' },
+              { tip: 'twitter', icon: '🐦' },
+              { tip: 'whatsapp', icon: '💬' },
+              { tip: 'email', icon: '📧' },
+              { tip: 'kopyala', icon: '🔗' },
+            ].map(({ tip, icon }) => (
+              <TouchableOpacity
+                key={tip}
+                onPress={() => paylaş(tip)}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 12,
+                  backgroundColor: '#f0f0f0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ fontSize: 22 }}>{icon}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={{
+          backgroundColor: '#fff',
+          borderRadius: 12,
+          padding: 16,
+          marginTop: 24,
+        }}>
+          <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 6, color: TEXT }}>Açıklama</Text>
+          <Text style={{ color: '#666', lineHeight: 22 }}>
+            {etkinlik.aciklama || 'Açıklama eklenmemiş.'}
+          </Text>
+        </View>
+
+        <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, marginTop: 24 }}>
+          <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12, color: TEXT }}>Favoriye Ekleyenler</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {favorileyenler.slice(0, 6).map(user => {
+              const avatar = user.avatarUrl && user.avatarUrl.trim() !== ""
+                ? user.avatarUrl
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.kullanici || 'Kullanıcı')}`;
+
+              return (
+                <Image
+                  key={user.id}
+                  source={{ uri: avatar }}
+                  style={{ width: 40, height: 40, borderRadius: 20 }}
+                />
+              );
+            })}
+          </View>
+          <Text style={{ marginTop: 12, color: '#666' }}>{favoriSayisi} kişi favorilere ekledi</Text>
+          {favoriSayisi > 6 && (
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <Text style={{ marginTop: 6, color: PRIMARY, fontWeight: '600' }}>Tümünü Gör</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={{
+          backgroundColor: '#fff',
+          borderRadius: 12,
+          padding: 16,
+          marginTop: 24,
+        }}>
+          <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12, color: TEXT }}>
+            Yorumlar
+          </Text>
+
+          {yorumlar.length === 0 ? (
+            <Text style={{ color: '#aaa' }}>Henüz yorum yapılmamış.</Text>
+          ) : (
+            yorumlar.filter(y => !y.ustYorumId).map(y => (
+              <YorumCard key={y._id} yorum={y} level={0} />
+            ))
+          )}
+
+          {auth?.token ? (
+            <View style={{ marginTop: 16, paddingBottom: 40 }}>
+              <TextInput
+                placeholder="Yorumunuzu yazın..."
+                value={yeniYorum}
+                onChangeText={setYeniYorum}
+              multiline
+              scrollEnabled={false}
+                style={{
+                  borderColor: '#ccc',
+                  borderWidth: 1,
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 12,
+                  minHeight: 70,
+                }}
+              
+              />
+              <TouchableOpacity
+                onPress={yorumGonder}
+                style={{
+                  backgroundColor: PRIMARY,
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  alignSelf: 'flex-end',
+                  width: 120,
+                }}
+              >
+                <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600', fontSize: 16 }}>
+                  Gönder
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Text style={{ color: '#999', marginTop: 12 }}>
+              Yorum yapmak için giriş yapmalısınız.
+            </Text>
+          )}
+        </View>
+
+        {modalVisible && (
+          <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, backgroundColor: '#0008', justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ width: '85%', maxHeight: '70%', backgroundColor: '#fff', borderRadius: 12, padding: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 12, color: TEXT }}>Tüm Favorileyenler</Text>
+              <ScrollView>
+                {favorileyenler.map(user => (
+                  <View key={user.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                    <Image source={{ uri: user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.kullanici)}` }} style={{ width: 40, height: 40, borderRadius: 20, marginRight: 12 }} />
+                    <Text style={{ fontSize: 16 }}>{user.kullanici}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginTop: 12, backgroundColor: PRIMARY, borderRadius: 8, paddingVertical: 10 }}>
+                <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600' }}>Kapat</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+       </ScrollView>
+</KeyboardAvoidingView>
+  );
+}
