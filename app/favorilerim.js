@@ -1,9 +1,10 @@
 // app/favorilerim.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
 import FastImage from 'expo-fast-image';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import axiosClient from '../src/api/axiosClient';
 
 const Favorilerim = () => {
   const [favoriler, setFavoriler] = useState([]);
@@ -29,13 +30,15 @@ const Favorilerim = () => {
 
       for (const etkinlik of parsedFavoriler) {
         try {
-          const res = await fetch(`https://rotabackend-f4gqewcbfcfud4ac.qatarcentral-01.azurewebsites.net/api/etkinlik/${etkinlik.id}`);
-          if (res.ok) {
-            const data = await res.json();
-            gecerliFavoriler.push(data);
-          }
+
+          const { data } = await axiosClient.get(`/etkinlik/${etkinlik.id}`);
+          const item = { ...data };
+          if (item._id && !item.id) item.id = item._id;
+          gecerliFavoriler.push(item);
+
         } catch (err) {
-          console.warn(`Etkinlik ${etkinlik.id} silinmis olabilir.`);
+          console.warn(`Etkinlik ${etkinlik.id} getirilemedi, yereldeki veriler kullanılacak.`);
+          gecerliFavoriler.push(etkinlik);
         }
       }
 
