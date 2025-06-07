@@ -1,71 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import axiosClient from "../src/api/axiosClient";
-import { router, useLocalSearchParams } from "expo-router";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
-import * as AuthSession from 'expo-auth-session';
-
-WebBrowser.maybeCompleteAuthSession();
+import { KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 
 const PRIMARY = '#7B2CBF';
+const ACCENT = '#FFD54F';
 const TEXT = '#333';
 
 const RegisterScreen = () => {
-  const params = useLocalSearchParams();
-  const isGoogleUser = !!params.email;
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState(params.email || "");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '818824564698-58vpa2gmaci887t5b9nr9kqqjls2udbd.apps.googleusercontent.com',
-    expoClientId: '818824564698-58vpa2gmaci887t5b9nr9kqqjls2udbd.apps.googleusercontent.com',
-    scopes: ['profile', 'email'],
-    redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
-  });
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      fetchGoogleUser(authentication.accessToken);
-    }
-  }, [response]);
-
-  const fetchGoogleUser = async (token) => {
-    try {
-      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const user = await res.json();
-      const { email, name } = user;
-
-      const check = await axiosClient.post("/auth/google-check", { email });
-      if (check?.data?.token) {
-        await AsyncStorage.setItem("accessToken", check.data.token);
-        await AsyncStorage.setItem("username", check.data.user.username);
-        await AsyncStorage.setItem("email", check.data.user.email);
-        await AsyncStorage.setItem("role", check.data.user.role);
-        await AsyncStorage.setItem("userId", check.data.user._id);
-
-        Alert.alert("Başarılı", "Google ile giriş başarılı!", [
-          { text: "Tamam", onPress: () => router.push("/") },
-        ]);
-      } else {
-        router.push({
-          pathname: "/register",
-          params: { email, name },
-        });
-      }
-    } catch (err) {
-      Alert.alert("Hata", "Google kullanıcı bilgisi alınamadı.");
-    }
-  };
 
   const handleSubmit = async () => {
     if (password !== confirmPassword) {
@@ -74,7 +24,12 @@ const RegisterScreen = () => {
     }
 
     try {
-      await axiosClient.post("/auth/register", { username, email, password });
+      await axiosClient.post("/auth/register", {
+        username,
+        email,
+        password,
+      });
+
       Alert.alert("Başarılı", "Kayıt başarılı! Giriş yapabilirsiniz.", [
         { text: "Tamam", onPress: () => router.push("/login") },
       ]);
@@ -84,23 +39,26 @@ const RegisterScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+
         <Text style={styles.title}>Kayıt Ol</Text>
 
         <TextInput
           style={styles.input}
           placeholder="Kullanıcı Adı"
           value={username}
-          onChangeText={setUsername}
+          onChangeText={(text) => setUsername(text.replace(/\s/g, ''))}
         />
 
         <TextInput
-          style={[styles.input, isGoogleUser && { backgroundColor: '#eee' }]}
+          style={styles.input}
           placeholder="E-posta"
           value={email}
           onChangeText={setEmail}
-          editable={!isGoogleUser}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -113,8 +71,11 @@ const RegisterScreen = () => {
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
           />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-            <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color="#999" />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={20} color="#999" />
           </TouchableOpacity>
         </View>
 
@@ -126,8 +87,11 @@ const RegisterScreen = () => {
             onChangeText={setConfirmPassword}
             secureTextEntry={!showConfirmPassword}
           />
-          <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
-            <Ionicons name={showConfirmPassword ? 'eye-off' : 'eye'} size={20} color="#999" />
+          <TouchableOpacity
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons name={showConfirmPassword ? 'eye' : 'eye-off'} size={20} color="#999" />
           </TouchableOpacity>
         </View>
 
@@ -135,11 +99,7 @@ const RegisterScreen = () => {
           <Text style={styles.buttonText}>Kayıt Ol</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity disabled={!request} onPress={() => promptAsync()} style={[styles.button, { backgroundColor: '#DB4437' }]}>
-          <Text style={styles.buttonText}>Google ile Kayıt Ol</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push("/login")}> 
+        <TouchableOpacity onPress={() => router.push("/login")}>
           <Text style={styles.link}>Zaten hesabınız var mı? Giriş Yap</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -201,7 +161,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
     fontSize: 13,
-  },
+  }
 });
 
 export default RegisterScreen;
