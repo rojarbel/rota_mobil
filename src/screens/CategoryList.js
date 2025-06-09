@@ -5,7 +5,7 @@ import axiosClient from '../api/axiosClient';
 import FastImage from 'expo-fast-image';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import qs from 'qs';
-import logger from '../utils/logger';
+import handleApiError from '../utils/handleApiError';
 
 const PRIMARY = '#7B2CBF';
 const SECONDARY = '#FFD54F';
@@ -92,7 +92,7 @@ const CategoryList = ({ category, typeOptions = [], emptyMessage = 'Uygun etkinl
           setEvents(yeni);
         }
       } catch (err) {
-        logger.error('Etkinlik çekme hatası:', err);
+        handleApiError(err, 'Etkinlik çekme hatası');
       } finally {
         setLoading(false);
       }

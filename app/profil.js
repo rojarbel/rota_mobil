@@ -7,13 +7,14 @@ import { useEffect, useState } from 'react';
 import { Alert, Image, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from '../src/utils/logger';
-
+import useAuth from '../src/hooks/useAuth';
 const PRIMARY = '#7B2CBF';
 const TEXT = '#333';
 const BG = '#FFFFFF';
 
 
 function Profil() {
+  const { username: authUsername, email: authEmail, userId, token } = useAuth();
     const [showDatePicker, setShowDatePicker] = useState(false);
   const [formData, setFormData] = useState({
     userId: '',
@@ -27,9 +28,7 @@ function Profil() {
 
 const loadUser = async () => {
   try {
-    const username = await AsyncStorage.getItem('username') || '';
-    const email = await AsyncStorage.getItem('email') || '';
-    const userId = await AsyncStorage.getItem('userId') || '';
+
     const city = await AsyncStorage.getItem('city') || '';
     const birthDate = await AsyncStorage.getItem('birthDate') || '';
     const fullname = await AsyncStorage.getItem('fullname') || '';
@@ -37,8 +36,8 @@ const loadUser = async () => {
 
     setFormData({
       userId,
-      username,
-      email,
+      username: authUsername,
+      email: authEmail,
       city,
       birthDate,
       fullname,
@@ -46,7 +45,7 @@ const loadUser = async () => {
     });
 
     logger.log('🧠 Profil verisi yüklendi:', {
-      userId, username, email, city, birthDate, fullname, image,
+      userId, username: authUsername, email: authEmail, city, birthDate, fullname, image,
     });
 
   } catch (err) {
@@ -78,7 +77,7 @@ const handleImageUpload = async () => {
 
 const handleUpdate = async () => {
   try {
-    const token = await AsyncStorage.getItem("token");
+    const token = await AsyncStorage.getItem("accessToken");
 
     const formDataToSend = new FormData();
     formDataToSend.append("email", String(formData.email));

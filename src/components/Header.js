@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { deleteItems } from '../utils/storage';
 import { router } from 'expo-router';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -14,11 +14,11 @@ import {
   View,
 } from 'react-native';
 import axiosClient from '../api/axiosClient';
-import { AuthContext } from '../context/AuthContext';
+import useAuth from '../hooks/useAuth';
 import { Platform, StatusBar } from 'react-native';
 import { setCachedToken } from '../api/axiosClient';
 import FastImage from 'expo-fast-image';
-import logger from '../utils/logger';
+import handleApiError from '../utils/handleApiError';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableWithoutFeedback, Keyboard } from 'react-native';
 
@@ -37,7 +37,7 @@ const [profilePhoto, setProfilePhoto] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [bekleyenSayisi, setBekleyenSayisi] = useState(0);
   const [bekleyenEtkinlikler, setBekleyenEtkinlikler] = useState([]);
-  const auth = useContext(AuthContext);
+  const auth = useAuth();
   const { isLoggedIn, username, role } = auth || {};
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [bildirimler, setBildirimler] = useState([]);
@@ -56,7 +56,7 @@ const [profilePhoto, setProfilePhoto] = useState(null);
 
       setSearchResults(res.data);
     } catch (err) {
-      logger.error('Arama sonuçları alınamadı', err);
+      handleApiError(err, 'Arama sonuçları alınamadı');
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -92,7 +92,7 @@ const [profilePhoto, setProfilePhoto] = useState(null);
         setBekleyenSayisi(res.data.length);
         setBekleyenEtkinlikler(res.data);
       } catch (err) {
-        logger.error('Bekleyen etkinlikler alınamadı', err);
+        handleApiError(err, 'Bekleyen etkinlikler alınamadı');
 
       }
     };
@@ -120,7 +120,7 @@ useEffect(() => {
           prev.map(b => ({ ...b, okunduMu: true }))
         );
       })
-      .catch(err => logger.error('Bildirim okundu işaretlenemedi', err));
+      .catch(err => handleApiError(err, 'Bildirim okundu işaretlenemedi'));
   }
 }, [bildirimPanelAcik]);
 
@@ -131,7 +131,7 @@ useEffect(() => {
       const res = await axiosClient.get("/bildirim");
       setBildirimler(res.data || []);
     } catch (err) {
-      logger.error('Bildirimler alınamadı', err);
+      handleApiError(err, 'Bildirimler alınamadı');
 
     }
   };
@@ -150,7 +150,7 @@ if ((bildirim.tip === 'yanit' || bildirim.tip === 'begeni') && bildirim.yorumId)
       Alert.alert("Etkinlik bulunamadı");
     }
   } catch (err) {
-    Alert.alert("Yorum verisi alınamadı");
+   handleApiError(err, 'Yorum verisi alınamadı');
   }
 }
 
@@ -197,7 +197,7 @@ if (bildirim.tip === 'favori' && bildirim.etkinlikId) {
       prev.map(b => ({ ...b, okunduMu: true }))
     );
   } catch (err) {
-    logger.error('Bildirim okundu işaretlenemedi', err);
+    handleApiError(err, 'Bildirim okundu işaretlenemedi');
   }
 }}
     style={styles.notificationButton}

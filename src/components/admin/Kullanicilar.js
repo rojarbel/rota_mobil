@@ -5,7 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import { getItem as getSecureItem } from '../../utils/storage';
 import axiosClient from '../../api/axiosClient';
 import { FlatList } from 'react-native';
-import logger from '../../utils/logger';
+import handleApiError from '../../utils/handleApiError';
 
 const Kullanicilar = () => {
   const [users, setUsers] = useState([]);
@@ -22,7 +22,7 @@ const Kullanicilar = () => {
         });
         setUsers(res.data);
       } catch (err) {
-        logger.error('Kullanıcıları çekerken hata oluştu:', err);
+        handleApiError(err, 'Kullanıcıları çekerken hata oluştu');
 
       } finally {
         setLoading(false);
@@ -47,7 +47,7 @@ const Kullanicilar = () => {
               });
               setUsers(users.filter((user) => user.id !== id));
             } catch (err) {
-              logger.error('Kullanıcı silme hatası:', err);
+              handleApiError(err, 'Kullanıcı silme hatası');
             }
           },
         },
@@ -68,7 +68,7 @@ const Kullanicilar = () => {
         prev.map((user) => (user.id === id ? { ...user, role: newRole } : user))
       );
     } catch (err) {
-      logger.error('Rol güncelleme hatası:', err);
+      handleApiError(err, 'Rol güncelleme hatası');
     }
   };
 

@@ -5,9 +5,8 @@ import * as ImagePicker from 'expo-image-picker';
 import axiosClient from '../src/api/axiosClient';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getItem as getSecureItem } from '../src/utils/storage';
 import { useEffect } from 'react';
+import useAuth from '../src/hooks/useAuth';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
@@ -30,16 +29,13 @@ const kategorilerVeTurler = {
 
 const EtkinlikEkleScreen = () => {
   const router = useRouter();
-useEffect(() => {
-  const checkLogin = async () => {
-    const token = await getSecureItem('accessToken');
-    logger.log('TOKEN ===>', token);
-    if (!token) {
+  const { isLoggedIn, authLoaded } = useAuth();
+
+  useEffect(() => {
+    if (authLoaded && !isLoggedIn) {
       router.replace('/login');
     }
-  };
-  checkLogin();
-}, []);
+  }, [authLoaded, isLoggedIn]);
 
   const [baslik, setBaslik] = useState('');
   const [sehir, setSehir] = useState('');

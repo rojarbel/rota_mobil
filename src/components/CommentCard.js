@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { Alert, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../api/axiosClient';
 import { AuthContext } from '../context/AuthContext';
+import handleApiError from '../utils/handleApiError';
 
 const PRIMARY = '#7B2CBF';
 
@@ -66,8 +67,8 @@ function CommentCard({
       });
       setYorumlar(prev => prev.map(y => (y._id === yorum._id ? data : y)));
       setDuzenleModu(false);
-    } catch {
-      Alert.alert('Hata', 'Yorum güncellenemedi');
+    } catch (err) {
+      handleApiError(err, 'Yorum güncellenemedi');
     }
   };
 
@@ -81,8 +82,8 @@ function CommentCard({
           try {
             await axiosClient.delete(`/yorum/${yorum._id}`);
             setYorumlar(prev => prev.filter(y => y._id !== yorum._id));
-          } catch {
-            Alert.alert('Hata', 'Silme başarısız');
+          } catch (err) {
+            handleApiError(err, 'Silme başarısız');
           }
         },
       },
@@ -119,7 +120,9 @@ function CommentCard({
                 try {
                   const { data: updated } = await axiosClient.put(`/yorum/begen/${yorum._id}`);
                   setYorumlar(prev => prev.map(item => (item._id === updated._id ? updated : item)));
-                } catch {}
+                } catch (err) {
+                  handleApiError(err, 'Beğenme işlemi başarısız');
+                }
               },
               yorum.begeni || 0,
               yorum.tarih

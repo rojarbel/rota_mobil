@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Button, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { getItem as getSecureItem } from '../../utils/storage';
 import logger from '../../utils/logger';
-
+import handleApiError from '../../utils/handleApiError';
 
 const EtkinlikOnay = () => {
   const [bekleyenEtkinlikler, setBekleyenEtkinlikler] = useState([]);
@@ -22,7 +22,7 @@ const EtkinlikOnay = () => {
       );
       setBekleyenEtkinlikler(response.data);
     } catch (error) {
-      logger.error('Etkinlikler alınamadı', error);
+      handleApiError(error, 'Etkinlikler alınamadı'); 
 
     }
   };
@@ -44,7 +44,8 @@ const EtkinlikOnay = () => {
       Alert.alert('Başarılı', 'Etkinlik onaylandı');
       getBekleyenEtkinlikler();
     } catch (error) {
-      logger.error('Etkinlik onaylanamadı', error);
+      handleApiError(error, 'Etkinlik onaylanamadı');
+
     }
   };
 
@@ -59,7 +60,7 @@ const EtkinlikOnay = () => {
       Alert.alert('Silindi', 'Etkinlik silindi');
       getBekleyenEtkinlikler();
     } catch (error) {
-      logger.error('Etkinlik silinemedi', error);
+      handleApiError(error, 'Etkinlik silinemedi');
     }
   };
 

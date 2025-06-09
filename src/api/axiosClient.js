@@ -44,6 +44,14 @@ axiosClient.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+        const map = {
+      400: 'İstek hatalı.',
+      401: 'Oturum açmanız gerekiyor.',
+      403: 'Bu işlem için yetkiniz yok.',
+      404: 'İstenen kaynak bulunamadı.',
+      500: 'Sunucu hatası, lütfen tekrar deneyin.',
+    };
+    error.userMessage = map[error.response?.status] || 'Bir hata oluştu.';
     return Promise.reject(error);
   }
   );
