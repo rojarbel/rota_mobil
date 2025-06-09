@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Image, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getItem as getSecureItem } from '../src/utils/storage';
 import logger from '../src/utils/logger';
 import useAuth from '../src/hooks/useAuth';
 const PRIMARY = '#7B2CBF';
@@ -77,7 +78,7 @@ const handleImageUpload = async () => {
 
 const handleUpdate = async () => {
   try {
-    const token = await AsyncStorage.getItem("accessToken");
+    const token = await getSecureItem('accessToken');
 
     const formDataToSend = new FormData();
     formDataToSend.append("email", String(formData.email));

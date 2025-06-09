@@ -186,7 +186,7 @@ export default function EtkinlikDetay() {
   }, [etkinlik]);
 
   const favoriToggle = async () => {
-    const token = await AsyncStorage.getItem('accessToken');
+    const token = await getSecureItem('accessToken');
     if (!token) {
       router.replace('/login');
       return;
