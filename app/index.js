@@ -12,7 +12,7 @@ import axiosClient from '../src/api/axiosClient';
 import SafeFlatList from '../src/components/SafeFlatList'; // yolunu kendi dizinine göre ayarla
 import FastImage from 'expo-fast-image';
 import { useCallback } from 'react';
-
+import logger from '../src/utils/logger';
 
 
 const Index = () => {
@@ -58,7 +58,7 @@ const fetchEtkinlikler = async () => {
    const hasMoreData = res.data?.hasMore;
     setHasMore(hasMoreData);
   } catch (err) {
-    console.error("Veri alınamadı:", err);
+    logger.error('Veri alınamadı:', err);
     setHasMore(false);
   } finally {
     setLoading(false);
@@ -155,7 +155,7 @@ const renderEtkinlik = useCallback(({ item }) => {
       </TouchableOpacity>
     );
   } catch (error) {
-    console.warn('renderEtkinlik crash:', error);
+    logger.warn('renderEtkinlik crash:', error);
     return null;
   }
 }, []);
@@ -188,7 +188,7 @@ const renderEtkinlik = useCallback(({ item }) => {
       if (!hasMore || loadingMore || isFetching.current) return;
       setPage(prev => prev + 1);
     } catch (e) {
-      console.warn("onEndReached crash:", e);
+      logger.warn('onEndReached crash:', e);
     }
   }}
   onEndReachedThreshold={0.4}

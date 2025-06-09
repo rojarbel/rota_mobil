@@ -3,6 +3,7 @@ import axiosClient from '../../api/axiosClient';
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { getItem as getSecureItem } from '../../utils/storage';
+import logger from '../../utils/logger';
 
 
 const EtkinlikOnay = () => {
@@ -21,7 +22,8 @@ const EtkinlikOnay = () => {
       );
       setBekleyenEtkinlikler(response.data);
     } catch (error) {
-      console.error('Etkinlikler alınamadı', error);
+      logger.error('Etkinlikler alınamadı', error);
+
     }
   };
 
@@ -42,7 +44,7 @@ const EtkinlikOnay = () => {
       Alert.alert('Başarılı', 'Etkinlik onaylandı');
       getBekleyenEtkinlikler();
     } catch (error) {
-      console.error('Etkinlik onaylanamadı', error);
+      logger.error('Etkinlik onaylanamadı', error);
     }
   };
 
@@ -57,7 +59,7 @@ const EtkinlikOnay = () => {
       Alert.alert('Silindi', 'Etkinlik silindi');
       getBekleyenEtkinlikler();
     } catch (error) {
-      console.error('Etkinlik silinemedi', error);
+      logger.error('Etkinlik silinemedi', error);
     }
   };
 
@@ -73,7 +75,8 @@ const EtkinlikOnay = () => {
             <Image
               source={{ uri: `https://rotabackend-f4gqewcbfcfud4ac.qatarcentral-01.azurewebsites.net/img/${etkinlik.gorsel?.split('/').pop()}` }}
               style={{ width: 200, height: 200 }}
-              onError={() => console.log('Görsel yüklenemedi')}
+              onError={() => logger.log('Görsel yüklenemedi')}
+
             />
             <Text style={styles.title}>{etkinlik.baslik}</Text>
             <Text style={styles.text}>{etkinlik.sehir} - {etkinlik.tarih}</Text>

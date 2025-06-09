@@ -18,6 +18,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Platform, StatusBar } from 'react-native';
 import { setCachedToken } from '../api/axiosClient';
 import FastImage from 'expo-fast-image';
+import logger from '../utils/logger';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableWithoutFeedback, Keyboard } from 'react-native';
 
@@ -55,7 +56,7 @@ const [profilePhoto, setProfilePhoto] = useState(null);
 
       setSearchResults(res.data);
     } catch (err) {
-      console.error('Arama sonuçları alınamadı', err);
+      logger.error('Arama sonuçları alınamadı', err);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -91,7 +92,8 @@ const [profilePhoto, setProfilePhoto] = useState(null);
         setBekleyenSayisi(res.data.length);
         setBekleyenEtkinlikler(res.data);
       } catch (err) {
-        console.error('Bekleyen etkinlikler alınamadı', err);
+        logger.error('Bekleyen etkinlikler alınamadı', err);
+
       }
     };
 
@@ -118,7 +120,7 @@ useEffect(() => {
           prev.map(b => ({ ...b, okunduMu: true }))
         );
       })
-      .catch(err => console.error("Bildirim okundu işaretlenemedi", err));
+      .catch(err => logger.error('Bildirim okundu işaretlenemedi', err));
   }
 }, [bildirimPanelAcik]);
 
@@ -129,7 +131,8 @@ useEffect(() => {
       const res = await axiosClient.get("/bildirim");
       setBildirimler(res.data || []);
     } catch (err) {
-      console.error("Bildirimler alınamadı", err);
+      logger.error('Bildirimler alınamadı', err);
+
     }
   };
 
@@ -194,7 +197,7 @@ if (bildirim.tip === 'favori' && bildirim.etkinlikId) {
       prev.map(b => ({ ...b, okunduMu: true }))
     );
   } catch (err) {
-    console.error('Bildirim okundu işaretlenemedi', err);
+    logger.error('Bildirim okundu işaretlenemedi', err);
   }
 }}
     style={styles.notificationButton}

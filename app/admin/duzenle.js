@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import FastImage from 'expo-fast-image';
+import logger from '../../src/utils/logger';
 
 const kategoriler = {
   Aktivizm: ["Hayvan Hakları", "İklim ve Ekoloji", "İşçi Hakları", "Kadın Hakları", "LGBTİ+ Etkinlikleri", "Mülteci Hakları"],
@@ -55,7 +56,7 @@ const handleSubmit = async () => {
     Alert.alert("Başarılı", "Etkinlik güncellendi");
     router.back();
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     Alert.alert("Hata", "Etkinlik güncellenemedi");
   }
 };
@@ -72,7 +73,7 @@ const handleDelete = () => {
           Alert.alert("Silindi", "Etkinlik başarıyla silindi");
           router.replace("/");
         } catch (err) {
-          console.error(err);
+          logger.error(err);
           Alert.alert("Hata", "Etkinlik silinemedi");
         }
       }

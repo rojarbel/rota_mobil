@@ -10,7 +10,8 @@ import { getItem as getSecureItem } from '../src/utils/storage';
 import { useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
-import * as FileSystem from 'expo-file-system'; 
+import * as FileSystem from 'expo-file-system';
+import logger from '../src/utils/logger';
 
 const kategorilerVeTurler = {
   Aktivizm: [
@@ -32,7 +33,7 @@ const EtkinlikEkleScreen = () => {
 useEffect(() => {
   const checkLogin = async () => {
     const token = await getSecureItem('accessToken');
-    console.log("TOKEN ===>", token); // ✅ Konsola yaz
+    logger.log('TOKEN ===>', token);
     if (!token) {
       router.replace('/login');
     }
@@ -117,7 +118,7 @@ const handleSubmit = async () => {
     setGorselPreview(null);
     router.push('/');
   } catch (error) {
-    console.error('Etkinlik gönderme hatası:', error.response?.data || error.message);
+    logger.error('Etkinlik gönderme hatası:', error.response?.data || error.message);
     alert('Gönderim sırasında bir hata oluştu.');
   }
 };

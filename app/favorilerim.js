@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../src/api/axiosClient';
 import { getItem as getSecureItem } from '../src/utils/storage';
+import logger from '../src/utils/logger';
 
 const Favorilerim = () => {
   const [favoriler, setFavoriler] = useState([]);
@@ -38,7 +39,7 @@ const Favorilerim = () => {
           gecerliFavoriler.push(item);
 
         } catch (err) {
-          console.warn(`Etkinlik ${etkinlik.id} getirilemedi, yereldeki veriler kullanılacak.`);
+          logger.warn(`Etkinlik ${etkinlik.id} getirilemedi, yereldeki veriler kullanılacak.`);
           gecerliFavoriler.push(etkinlik);
         }
       }

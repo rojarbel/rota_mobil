@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlatList, Text } from 'react-native';
+import logger from '../utils/logger';
 
 const SafeFlatList = ({ data, renderItem, keyExtractor, ...props }) => {
   const safeRenderItem = ({ item, index }) => {
@@ -7,7 +8,8 @@ const SafeFlatList = ({ data, renderItem, keyExtractor, ...props }) => {
       if (!item || typeof item !== 'object') return null;
       return renderItem({ item, index });
     } catch (e) {
-      console.warn('renderItem error at index', index, e);
+      logger.warn('renderItem error at index', index, e);
+
       return <Text style={{ color: 'red', padding: 10 }}>Hatalı içerik: {index}</Text>;
     }
   };

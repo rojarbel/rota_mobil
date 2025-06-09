@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Image, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import logger from '../src/utils/logger';
 
 const PRIMARY = '#7B2CBF';
 const TEXT = '#333';
@@ -44,12 +45,12 @@ const loadUser = async () => {
       image,
     });
 
-    console.log("🧠 Profil verisi yüklendi:", {
+    logger.log('🧠 Profil verisi yüklendi:', {
       userId, username, email, city, birthDate, fullname, image,
     });
 
   } catch (err) {
-    console.error("Profil bilgisi yüklenemedi:", err);
+    logger.error('Profil bilgisi yüklenemedi:', err);
   }
 };
 
@@ -122,7 +123,7 @@ if (updatedUser._id) await AsyncStorage.setItem("userId", updatedUser._id);
     Alert.alert("Başarılı", "Bilgiler başarıyla güncellendi!");
     await loadUser();
   } catch (err) {
-    console.error("Güncelleme hatası:", err?.response || err);
+    logger.error('Güncelleme hatası:', err?.response || err);
     Alert.alert("Hata", err.response?.data?.message || err.message);
   }
 };

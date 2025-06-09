@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getItem as getSecureItem, setItem as setSecureItem } from '../utils/storage';
+import logger from '../utils/logger';
 import Constants from 'expo-constants';
 
 let cachedToken = null;
@@ -39,7 +40,7 @@ axiosClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        console.log('Token yenileme başarısız');
+        logger.log('Token yenileme başarısız');
         return Promise.reject(refreshError);
       }
     }

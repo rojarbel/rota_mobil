@@ -3,7 +3,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getItem as getSecureItem } from '../utils/storage';
 import { createContext, useEffect, useState } from 'react';
-
+import logger from '../utils/logger';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
           setUserId(storedUserId);
         }
       } catch (err) {
-        console.error('Auth yüklenemedi:', err);
+        logger.error('Auth yüklenemedi:', err);
       } finally {
         setAuthLoaded(true); // ✅ en sonunda
       }

@@ -14,6 +14,7 @@ import { Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { KeyboardAvoidingView } from 'react-native';
 import CommentCard from '../../src/components/CommentCard';
+import logger from '../../src/utils/logger';
 
 const PRIMARY = '#7B2CBF';
 const ACCENT = '#FFD54F';
@@ -136,7 +137,7 @@ export default function EtkinlikDetay() {
         const { data } = await axiosClient.get(`/yorum/${id}`);
         setYorumlar(data);
       } catch (err) {
-        console.log('Yorumlar alınamadı', err);
+        logger.log('Yorumlar alınamadı', err);
       }
     };
     if (etkinlik) yorumlariGetir();
@@ -169,7 +170,7 @@ export default function EtkinlikDetay() {
         if (data._id && !data.id) data.id = data._id;
         setEtkinlik(data);
       } catch (err) {
-        console.error('Etkinlik verisi alınamadı', err);
+        logger.error('Etkinlik verisi alınamadı', err);
       }
     };
     fetchEtkinlik();

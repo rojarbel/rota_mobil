@@ -4,7 +4,7 @@ import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import axiosClient from "../src/api/axiosClient";
 import { useCallback } from 'react';
-
+import logger from '../src/utils/logger';
 
 export default function AramaSonuclari() {
   const { q, sehir } = useLocalSearchParams();
@@ -31,7 +31,7 @@ useEffect(() => {
 
       setEtkinlikler(etkinlikler);
     } catch (err) {
-      console.error('Etkinlik alınamadı:', err);
+      logger.error('Etkinlik alınamadı:', err);
     } finally {
       setLoading(false);
     }
