@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import axios from "axios";
+import axiosClient from "../../src/api/axiosClient";
+
 import { router, useLocalSearchParams } from "expo-router";
 
 const ResetPasswordScreen = () => {
@@ -16,7 +17,7 @@ const ResetPasswordScreen = () => {
     }
 
     try {
-      await axios.post(`https://rotabackend-f4gqewcbfcfud4ac.qatarcentral-01.azurewebsites.net/api/auth/reset-password/${token}`, {
+      await axiosClient.post(`/auth/reset-password/${token}`, {
         newPassword,
       });
       setMessage("Şifre başarıyla güncellendi. Giriş sayfasına yönlendiriliyorsunuz...");
