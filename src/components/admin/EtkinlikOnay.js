@@ -74,9 +74,8 @@ const EtkinlikOnay = () => {
             <View key={etkinlik.id || etkinlik._id} style={styles.card}>
             <Image
               source={{ uri: `https://rotabackend-f4gqewcbfcfud4ac.qatarcentral-01.azurewebsites.net/img/${etkinlik.gorsel?.split('/').pop()}` }}
-              style={{ width: 200, height: 200 }}
+              style={styles.image}
               onError={() => logger.log('Görsel yüklenemedi')}
-
             />
             <Text style={styles.title}>{etkinlik.baslik}</Text>
             <Text style={styles.text}>{etkinlik.sehir} - {etkinlik.tarih}</Text>
@@ -107,8 +106,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   image: {
-    width: '100%',
-    height: 160,
+    width: 200,
+    height: 200,
     borderRadius: 8,
   },
   title: {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, Text } from 'react-native';
+import { FlatList, Text, StyleSheet } from 'react-native';
 import logger from '../utils/logger';
 
 const SafeFlatList = ({ data, renderItem, keyExtractor, ...props }) => {
@@ -10,7 +10,7 @@ const SafeFlatList = ({ data, renderItem, keyExtractor, ...props }) => {
     } catch (e) {
       logger.warn('renderItem error at index', index, e);
 
-      return <Text style={{ color: 'red', padding: 10 }}>Hatalı içerik: {index}</Text>;
+      return <Text style={styles.error}>Hatalı içerik: {index}</Text>;
     }
   };
 
@@ -34,3 +34,10 @@ const SafeFlatList = ({ data, renderItem, keyExtractor, ...props }) => {
 };
 
 export default SafeFlatList;
+
+const styles = StyleSheet.create({
+  error: {
+    color: 'red',
+    padding: 10,
+  },
+});

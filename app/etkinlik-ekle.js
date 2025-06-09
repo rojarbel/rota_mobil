@@ -141,13 +141,7 @@ const handleSubmit = async () => {
 <Picker
   selectedValue={sehir}
   onValueChange={(val) => setSehir(val)}
-  style={{
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginBottom: 16,
-  }}
+  style={styles.cityPicker}
 >
   {[  "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın",
   "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı",
@@ -291,6 +285,13 @@ picker: {
   borderColor: '#ddd',
   borderWidth: 1,
   paddingHorizontal: 6,
+  marginBottom: 16,
+},
+cityPicker: {
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  borderColor: '#ccc',
+  borderWidth: 1,
   marginBottom: 16,
 },
 imageButton: {

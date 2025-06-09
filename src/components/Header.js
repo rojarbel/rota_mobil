@@ -214,13 +214,13 @@ if (bildirim.tip === 'favori' && bildirim.etkinlikId) {
 )}
 
 {isLoggedIn && (
-  <View style={{ position: 'relative' }}>
+  <View style={styles.relative}>
     <TouchableOpacity onPress={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}>
       <View style={styles.avatar}>
         {profilePhoto ? (
           <Image
             source={{ uri: profilePhoto }}
-            style={{ width: 32, height: 32, borderRadius: 16 }}
+            style={styles.profileImage}
             resizeMode="cover"
           />
         ) : (
@@ -353,12 +353,12 @@ if (bildirim.tip === 'favori' && bildirim.etkinlikId) {
     {bildirimler.length === 0 ? (
       <Text style={styles.panelEmpty}>Henüz bildirimin yok.</Text>
     ) : (
-<View style={{ maxHeight: 220 }}>
+<View style={styles.maxHeightList}>
   <FlatList
     data={bildirimler.slice(0, 12)} 
     keyExtractor={(item, index) => index.toString()}
     showsVerticalScrollIndicator={true}
-    style={{ maxHeight: 220 }}
+    style={styles.maxHeightList}
     contentContainerStyle={{ paddingBottom: 20 }}
     renderItem={({ item, index }) => {
         const etkinlik = item.etkinlikId || item.etkinlik || {};
@@ -679,6 +679,17 @@ panelEventText: {
   fontSize: 13,
   color: '#444',
 }
+relative: {
+  position: "relative",
+},
+profileImage: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+},
+maxHeightList: {
+  maxHeight: 220,
+},
 
   });
   export default Header;

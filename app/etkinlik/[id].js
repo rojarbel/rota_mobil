@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState, useRef } from 'react';
-import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View, Platform } from 'react-native';
+import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View, Platform, StyleSheet } from 'react-native';
 import { useContext } from 'react';
 import { AuthContext } from '../../src/context/AuthContext';
 import { router } from 'expo-router';
@@ -261,7 +261,7 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
   return (
 <KeyboardAvoidingView
   behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-  style={{ flex: 1 }}
+  style={styles.flex}
   keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
 >
 <ScrollView
@@ -269,29 +269,15 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
   keyboardShouldPersistTaps="handled"
   keyboardDismissMode="interactive"
   contentInsetAdjustmentBehavior="automatic"
-  contentContainerStyle={{
-    padding: 16,
-    paddingBottom: 200,
-    backgroundColor: '#f2f2f2' // AÇIK GRİ ARKA PLAN
-  }}
+  contentContainerStyle={styles.scrollContent}
 >
         <FastImage
           uri={gorselSrc}
           cacheKey={etkinlik.id}
-          style={{
-            width: '100%',
-            height: 330,
-            borderRadius: 16,
-            marginTop: 12,
-            shadowColor: '#000',
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 3,
-          }}
+          style={styles.headerImage}
         />
 
-        <View style={{ marginTop: 20, backgroundColor: '#fff', borderRadius: 12, padding: 16 }}>
+        <View style={styles.sectionFirst}>
           <Text style={{ fontSize: 22, fontWeight: '700', color: TEXT, marginBottom: 4 }}>
             {etkinlik.baslik}
           </Text>
@@ -305,16 +291,12 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
 
           <TouchableOpacity
             onPress={favoriToggle}
-            style={{
-              marginTop: 20,
-              paddingVertical: 12,
-              borderRadius: 8,
-              backgroundColor: favorideMi ? '#f8f4ff' : '#fff',
-              borderWidth: 1,
-              borderColor: PRIMARY,
-            }}
+            style={[
+              styles.favButton,
+              { backgroundColor: favorideMi ? '#f8f4ff' : '#fff' },
+            ]}
           >
-            <Text style={{ textAlign: 'center', color: PRIMARY, fontWeight: '600' }}>
+            <Text style={styles.favButtonText}>
               {favorideMi ? 'Favoriden Çıkar' : 'Favorilere Ekle'}
             </Text>
           </TouchableOpacity>
@@ -329,50 +311,25 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
                     params: { ...etkinlik, token },
                   });
                 }}
-                style={{
-                  backgroundColor: '#00cec9',
-                  paddingVertical: 14,
-                  borderRadius: 10,
-                  shadowColor: '#000',
-                  shadowOpacity: 0.08,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
+                style={[styles.adminButton, { backgroundColor: '#00cec9' }]}
               >
-                <Text style={{ color: '#fff', fontSize: 15, fontWeight: '600', textAlign: 'center' }}>
+                <Text style={styles.adminButtonText}>
                   ✏️ Etkinliği Düzenle
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={etkinlikSil}
-                style={{
-                  backgroundColor: '#d63031',
-                  paddingVertical: 14,
-                  borderRadius: 10,
-                  shadowColor: '#000',
-                  shadowOpacity: 0.08,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
+                style={[styles.adminButton, { backgroundColor: '#d63031' }]}
               >
-                <Text style={{ color: '#fff', fontSize: 15, fontWeight: '600', textAlign: 'center' }}>
+                <Text style={styles.adminButtonText}>
                   🗑️ Etkinliği Sil
                 </Text>
               </TouchableOpacity>
             </View>
           )}
-          <View
-            style={{
-              marginTop: 16,
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: 18,
-            }}
-          >
+          <View style={styles.shareRow}
+           >
             {[
               { tip: 'instagram', icon: '📸' },
               { tip: 'facebook', icon: '📘' },
@@ -384,14 +341,7 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
               <TouchableOpacity
                 key={tip}
                 onPress={() => paylaş(tip)}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 12,
-                  backgroundColor: '#f0f0f0',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
+                style={styles.shareButton}
               >
                 <Text style={{ fontSize: 22 }}>{icon}</Text>
               </TouchableOpacity>
@@ -467,34 +417,21 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
           )}
 
           {auth?.token ? (
-            <View style={{ marginTop: 16, paddingBottom: 40 }}>
+            <View style={styles.commentBox}>
               <TextInput
                 placeholder="Yorumunuzu yazın..."
                 value={yeniYorum}
                 onChangeText={setYeniYorum}
               multiline
               scrollEnabled={false}
-                style={{
-                  borderColor: '#ccc',
-                  borderWidth: 1,
-                  borderRadius: 8,
-                  padding: 12,
-                  marginBottom: 12,
-                  minHeight: 70,
-                }}
+              style={styles.commentInput}
               
               />
               <TouchableOpacity
                 onPress={yorumGonder}
-                style={{
-                  backgroundColor: PRIMARY,
-                  borderRadius: 8,
-                  paddingVertical: 12,
-                  alignSelf: 'flex-end',
-                  width: 120,
-                }}
+                style={styles.commentButton}
               >
-                <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600', fontSize: 16 }}>
+                <Text style={styles.commentButtonText}>
                   Gönder
                 </Text>
               </TouchableOpacity>
@@ -527,8 +464,8 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
                   );
                 })}
               </ScrollView>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginTop: 12, backgroundColor: PRIMARY, borderRadius: 8, paddingVertical: 10 }}>
-                <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600' }}>Kapat</Text>
+        <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalClose}>
+                <Text style={styles.modalCloseText}>Kapat</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -537,3 +474,104 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
 </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 200,
+    backgroundColor: '#f2f2f2',
+  },
+  headerImage: {
+    width: '100%',
+    height: 330,
+    borderRadius: 16,
+    marginTop: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  sectionFirst: {
+    marginTop: 20,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+  },
+  favButton: {
+    marginTop: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: PRIMARY,
+  },
+  favButtonText: {
+    textAlign: 'center',
+    color: PRIMARY,
+    fontWeight: '600',
+  },
+  adminButton: {
+    paddingVertical: 14,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  adminButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  shareRow: {
+    marginTop: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 18,
+  },
+  shareButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  commentBox: { marginTop: 16, paddingBottom: 40 },
+  commentInput: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    minHeight: 70,
+  },
+  commentButton: {
+    backgroundColor: PRIMARY,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignSelf: 'flex-end',
+    width: 120,
+  },
+  commentButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  modalClose: {
+    marginTop: 12,
+    backgroundColor: PRIMARY,
+    borderRadius: 8,
+    paddingVertical: 10,
+  },
+  modalCloseText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+});

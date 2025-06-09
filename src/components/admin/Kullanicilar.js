@@ -72,7 +72,7 @@ const Kullanicilar = () => {
     }
   };
 
-  if (loading) return <ActivityIndicator size="large" color="#007bff" style={{ marginTop: 50 }} />;
+  if (loading) return <ActivityIndicator size="large" color="#007bff" style={styles.loading} />;
 
   return (
 <View style={styles.container}>
@@ -113,6 +113,9 @@ const Kullanicilar = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+  },
+  loading: {
+    marginTop: 50,
   },
   header: {
     fontSize: 22,
