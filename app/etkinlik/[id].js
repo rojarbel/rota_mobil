@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getItem as getSecureItem } from '../../src/utils/storage';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
@@ -109,7 +110,7 @@ export default function EtkinlikDetay() {
     if (!metin) return;
 
     try {
-      const token = await AsyncStorage.getItem('accessToken');
+      const token = await getSecureItem('accessToken'); 
       const image = await AsyncStorage.getItem('image');
 
       const { data } = await axiosClient.post('/yorum', {
@@ -145,7 +146,7 @@ export default function EtkinlikDetay() {
     if (!yeniYorum.trim()) return;
 
     try {
-      const token = await AsyncStorage.getItem('accessToken');
+      const token = await getSecureItem('accessToken');
       const image = await AsyncStorage.getItem('image');
       const { data } = await axiosClient.post('/yorum', {
         etkinlikId: etkinlik.id,
@@ -236,7 +237,7 @@ export default function EtkinlikDetay() {
       {
         text: 'Sil', style: 'destructive', onPress: async () => {
           try {
-            const token = await AsyncStorage.getItem('accessToken');
+            const token = await getSecureItem('accessToken');
             await axiosClient.delete(`/etkinlik/${etkinlik.id}`);
 
             Alert.alert('Silindi', 'Etkinlik silindi.');
@@ -321,7 +322,7 @@ const gorselSrc = etkinlik.gorsel?.startsWith('http') ? etkinlik.gorsel : `${bac
             <View style={{ marginTop: 24, gap: 12 }}>
               <TouchableOpacity
                 onPress={async () => {
-                  const token = await AsyncStorage.getItem('accessToken');
+                  const token = await getSecureItem('accessToken');
                   router.push({
                     pathname: '/admin/duzenle',
                     params: { ...etkinlik, token },

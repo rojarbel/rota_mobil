@@ -6,6 +6,7 @@ import axiosClient from '../src/api/axiosClient';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getItem as getSecureItem } from '../src/utils/storage';
 import { useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
@@ -30,7 +31,7 @@ const EtkinlikEkleScreen = () => {
   const router = useRouter();
 useEffect(() => {
   const checkLogin = async () => {
-    const token = await AsyncStorage.getItem('accessToken');
+    const token = await getSecureItem('accessToken');
     console.log("TOKEN ===>", token); // ✅ Konsola yaz
     if (!token) {
       router.replace('/login');

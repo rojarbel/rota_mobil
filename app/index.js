@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import api from '../src/api/api';
 import axiosClient from '../src/api/axiosClient';
 import SafeFlatList from '../src/components/SafeFlatList'; // yolunu kendi dizinine göre ayarla
 import FastImage from 'expo-fast-image';

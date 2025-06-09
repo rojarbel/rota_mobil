@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { deleteItems } from '../utils/storage';
 import { router } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import {
@@ -15,7 +16,7 @@ import {
 import axiosClient from '../api/axiosClient';
 import { AuthContext } from '../context/AuthContext';
 import { Platform, StatusBar } from 'react-native';
-import { setCachedToken } from '../api/api';
+import { setCachedToken } from '../api/axiosClient';
 import FastImage from 'expo-fast-image';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableWithoutFeedback, Keyboard } from 'react-native';
@@ -236,7 +237,8 @@ if (bildirim.tip === 'favori' && bildirim.etkinlikId) {
           <Text style={styles.dropdownItem}>Profil</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={async () => {
-          await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user', 'image']);
+          await deleteItems(['accessToken', 'refreshToken']);
+          await AsyncStorage.multiRemove(['user', 'image']);
           setProfilePhoto(null);
           setCachedToken(null);
           setIsProfileDropdownOpen(false);

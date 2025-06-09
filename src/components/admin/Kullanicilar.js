@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, ActivityIndicator, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getItem as getSecureItem } from '../../utils/storage';
 import axiosClient from '../../api/axiosClient';
 import { FlatList } from 'react-native';
 
@@ -14,7 +14,7 @@ const Kullanicilar = () => {
   useEffect(() => {
     const fetchTokenAndUsers = async () => {
       try {
-        const storedToken = await AsyncStorage.getItem('accessToken');
+        const storedToken = await getSecureItem('accessToken');
         setToken(storedToken);
         const res = await axiosClient.get('/users', {
           headers: { Authorization: `Bearer ${storedToken}` },

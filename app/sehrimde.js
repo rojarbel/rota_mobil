@@ -4,6 +4,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getItem as getSecureItem } from '../src/utils/storage';
 import { useMemo } from 'react';
 
 const cities = [
@@ -26,7 +27,7 @@ export default function Sehrimde() {
   const citiesMemo = useMemo(() => cities, []);
   useEffect(() => {
   const checkLogin = async () => {
-    const token = await AsyncStorage.getItem('accessToken');
+    const token = await getSecureItem('accessToken');
     if (!token) {
       router.replace('/login');
     }

@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../src/api/axiosClient';
+import { getItem as getSecureItem } from '../src/utils/storage';
 
 const Favorilerim = () => {
   const [favoriler, setFavoriler] = useState([]);
@@ -12,7 +13,7 @@ const Favorilerim = () => {
 
   useEffect(() => {
     const checkLogin = async () => {
-      const token = await AsyncStorage.getItem('accessToken');
+      const token = await getSecureItem('accessToken');
       if (!token) {
         router.replace('/login');
       }

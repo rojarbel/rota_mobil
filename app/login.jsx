@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "reac
 import axiosClient from "../src/api/axiosClient";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setItem as setSecureItem, getItem as getSecureItem } from "../src/utils/storage";
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from "../src/context/AuthContext";
 import { KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
@@ -23,7 +24,7 @@ const { setIsLoggedIn, setUsername, setRole, setEmail: setAuthEmail,setToken } =
   const handleSubmit = async () => {
    
     try {
-       console.log("🚀 handleSubmit başladı");
+
 const res = await axiosClient.post("/auth/login", {
         email,
         password, 
@@ -33,10 +34,10 @@ const accessToken = res.data.token;
 const refreshToken = res.data.refreshToken;
 const user = res.data.user;
 
-await AsyncStorage.setItem("accessToken", accessToken);
-const test = await AsyncStorage.getItem("accessToken");
-console.log("🔐 accessToken yazıldı mı:", test);
-await AsyncStorage.setItem("refreshToken", refreshToken);
+await setSecureItem("accessToken", accessToken);
+const test = await getSecureItem("accessToken");
+
+await setSecureItem("refreshToken", refreshToken);
 
 await AsyncStorage.setItem("username", user.username);
 await AsyncStorage.setItem("email", user.email);

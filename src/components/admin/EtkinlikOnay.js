@@ -2,7 +2,7 @@
 import axiosClient from '../../api/axiosClient';
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import { getItem as getSecureItem } from '../../utils/storage';
 
 
 const EtkinlikOnay = () => {
@@ -10,7 +10,7 @@ const EtkinlikOnay = () => {
 
   const getBekleyenEtkinlikler = async () => {
     try {
-      const token = await AsyncStorage.getItem('accessToken');
+      const token = await getSecureItem('accessToken');
       const response = await axiosClient.get(
         '/etkinlik/bekleyen',
         {
@@ -31,7 +31,7 @@ const EtkinlikOnay = () => {
 
   const handleEtkinlikOnayla = async (id) => {
     try {
-        const token = await AsyncStorage.getItem('accessToken');
+        const token = await getSecureItem('accessToken');
         await axiosClient.put(`/etkinlik/onayla/${id}`, null, {
 
           headers: {
@@ -48,7 +48,7 @@ const EtkinlikOnay = () => {
 
   const handleEtkinlikSil = async (id) => {
     try {
-        const token = await AsyncStorage.getItem('accessToken');
+        const token = await getSecureItem('accessToken');
         await axiosClient.delete(`/etkinlik/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
