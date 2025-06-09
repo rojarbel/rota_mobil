@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { isAdmin } from '../src/guards/admin-check';
 import EtkinlikOnay from '../src/components/admin/EtkinlikOnay';
 import Kullanicilar from '../src/components/admin/Kullanicilar';
 

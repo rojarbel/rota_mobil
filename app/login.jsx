@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "reac
 import axiosClient from "../src/api/axiosClient";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setItem as setSecureItem, getItem as getSecureItem } from "../src/utils/storage";
+import { setItem as setSecureItem } from "../src/utils/storage";
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from "../src/context/AuthContext";
 import { KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
@@ -35,7 +35,7 @@ const refreshToken = res.data.refreshToken;
 const user = res.data.user;
 
 await setSecureItem("accessToken", accessToken);
-const test = await getSecureItem("accessToken");
+
 
 await setSecureItem("refreshToken", refreshToken);
 

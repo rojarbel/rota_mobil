@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getItem as getSecureItem } from '../../src/utils/storage';
 import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState, useRef } from 'react';
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View, Platform } from 'react-native';
