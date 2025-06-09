@@ -1,43 +1,53 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import axiosClient from "../src/api/axiosClient";
-import { router } from "expo-router";
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import axiosClient from '../src/api/axiosClient';
+import { router } from 'expo-router';
 
-const ForgotPasswordScreen = () => {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+const ChangePasswordScreen = () => {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async () => {
     try {
-      await axiosClient.post("/auth/reset-password-request", { email });
-      setMessage("Eğer bu e-posta kayıtlıysa, sıfırlama bağlantısı gönderildi.");
+      await axiosClient.post('/auth/change-password', {
+        currentPassword,
+        newPassword,
+      });
+      setMessage('Şifre başarıyla güncellendi.');
     } catch (err) {
-      setMessage("Bir hata oluştu. Lütfen tekrar deneyin.");
+      setMessage('Şifre güncellenemedi. Lütfen tekrar deneyin.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Şifre Sıfırla</Text>
-
-      <Text style={styles.label}>Kayıtlı E-posta Adresiniz</Text>
+      <Text style={styles.title}>Şifre Değiştir</Text>
+      <Text style={styles.label}>Mevcut Şifre</Text>
       <TextInput
         style={styles.input}
-        placeholder="ornek@mail.com"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
+        placeholder="Mevcut şifre"
+        secureTextEntry
+        value={currentPassword}
+        onChangeText={setCurrentPassword}
+      />
+      <Text style={styles.label}>Yeni Şifre</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Yeni şifre"
+        secureTextEntry
+        value={newPassword}
+        onChangeText={setNewPassword}
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Şifre Sıfırlama Bağlantısı Gönder</Text>
+        <Text style={styles.buttonText}>Şifreyi Güncelle</Text>
       </TouchableOpacity>
 
       {message ? <Text style={styles.message}>{message}</Text> : null}
 
-      <TouchableOpacity onPress={() => router.push("/login")}> 
-        <Text style={styles.link}>Giriş sayfasına dönmek için buraya tıklayın</Text>
+      <TouchableOpacity onPress={() => router.back()}>
+        <Text style={styles.link}>Geri dön</Text>
       </TouchableOpacity>
     </View>
   );
@@ -46,7 +56,7 @@ const ForgotPasswordScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: 24,
     backgroundColor: "#FFFFFF",
   },
@@ -100,4 +110,4 @@ buttonText: {
   },
 });
 
-export default ForgotPasswordScreen;
+export default ChangePasswordScreen;
