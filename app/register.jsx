@@ -63,7 +63,7 @@ const RegisterScreen = () => {
           autoCapitalize="none"
         />
 
-        <View style={{ position: 'relative' }}>
+        <View style={styles.relative}>
           <TextInput
             style={styles.input}
             placeholder="Şifre"
@@ -79,7 +79,7 @@ const RegisterScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={{ position: 'relative' }}>
+        <View style={styles.relative}>
           <TextInput
             style={styles.input}
             placeholder="Şifre (tekrar)"
@@ -161,6 +161,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
     fontSize: 13,
+  },
+  relative: {
+    position: 'relative',
   }
 });
 

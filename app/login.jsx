@@ -82,7 +82,7 @@ setToken(accessToken);
         keyboardType="email-address"
         autoCapitalize="none"
       />
-<View style={{ position: 'relative' }}>
+<View style={styles.relative}>
   <TextInput
     style={styles.input}
     placeholder="Şifre"
@@ -168,6 +168,9 @@ link: {
   textAlign: 'center',
   marginTop: 16,
   fontSize: 13,
+},
+relative: {
+  position: 'relative',
 }
 });
 

@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, Text } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
@@ -15,22 +15,47 @@ const BottomTabBar = () => {
   ];
 
   return (
-      <View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        padding: 12,
-        borderTopWidth: 1,
-        borderTopColor: '#ccc',
-        backgroundColor: '#fff'
-      }}>
+    <View style={styles.container}>
       {tabs.map((tab, index) => (
-        <TouchableOpacity key={index} onPress={() => router.push(tab.path)} style={{ alignItems: 'center' }}>
-          <Ionicons name={tab.icon} size={24} color={pathname === tab.path ? '#6c5ce7' : 'gray'} />
-          <Text style={{ fontSize: 10, color: pathname === tab.path ? '#6c5ce7' : 'gray' }}>{tab.name}</Text>
+        <TouchableOpacity
+          key={index}
+          onPress={() => router.push(tab.path)}
+          style={styles.tab}
+        >
+          <Ionicons
+            name={tab.icon}
+            size={24}
+            color={pathname === tab.path ? '#6c5ce7' : 'gray'}
+          />
+          <Text
+            style={[
+              styles.tabText,
+              { color: pathname === tab.path ? '#6c5ce7' : 'gray' },
+            ]}
+          >
+            {tab.name}
+          </Text>
         </TouchableOpacity>
       ))}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+    backgroundColor: '#fff',
+  },
+  tab: {
+    alignItems: 'center',
+  },
+  tabText: {
+    fontSize: 10,
+  },
+});
 
 export default BottomTabBar;

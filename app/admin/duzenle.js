@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import axiosClient from '../../src/api/axiosClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
@@ -82,20 +82,20 @@ const handleDelete = () => {
 };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16 }}>Etkinliği Düzenle</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Etkinliği Düzenle</Text>
 
       <Text>Başlık</Text>
-      <TextInput value={form.baslik} onChangeText={text => handleChange("baslik", text)} style={{ borderWidth: 1, padding: 8, marginBottom: 12 }} />
+      <TextInput value={form.baslik} onChangeText={text => handleChange("baslik", text)} style={styles.input} />
 
       <Text>Şehir</Text>
-      <TextInput value={form.sehir} onChangeText={text => handleChange("sehir", text)} style={{ borderWidth: 1, padding: 8, marginBottom: 12 }} />
+      <TextInput value={form.sehir} onChangeText={text => handleChange("sehir", text)} style={styles.input} />
 
       <Text>Tarih</Text>
-      <TextInput value={form.tarih} onChangeText={text => handleChange("tarih", text)} style={{ borderWidth: 1, padding: 8, marginBottom: 12 }} placeholder="yyyy-mm-dd" />
+      <TextInput value={form.tarih} onChangeText={text => handleChange("tarih", text)} style={styles.input} placeholder="yyyy-mm-dd" />
 
       <Text>Fiyat</Text>
-      <TextInput value={form.fiyat} onChangeText={text => handleChange("fiyat", text)} style={{ borderWidth: 1, padding: 8, marginBottom: 12 }} />
+      <TextInput value={form.fiyat} onChangeText={text => handleChange("fiyat", text)} style={styles.input} />
 
       <Text>Kategori</Text>
       <Picker selectedValue={form.kategori} onValueChange={(val) => handleChange("kategori", val)}>
@@ -114,25 +114,41 @@ const handleDelete = () => {
       </Picker>
 
       <Text>Görsel URL</Text>
-      <TextInput value={form.gorsel} onChangeText={text => handleChange("gorsel", text)} style={{ borderWidth: 1, padding: 8, marginBottom: 12 }} />
+      <TextInput value={form.gorsel} onChangeText={text => handleChange("gorsel", text)} style={styles.input} />
       {form.gorsel?.length > 5 && (
       <FastImage
         uri={form.gorsel}
         cacheKey={form.gorsel}
-        style={{ width: '100%', height: 220, borderRadius: 12, marginBottom: 12 }}
+        style={styles.preview}
       />
     )}
 
       <Text>Açıklama</Text>
-      <TextInput multiline numberOfLines={4} value={form.aciklama} onChangeText={text => handleChange("aciklama", text)} style={{ borderWidth: 1, padding: 8, marginBottom: 12 }} />
+      <TextInput multiline numberOfLines={4} value={form.aciklama} onChangeText={text => handleChange("aciklama", text)} style={styles.input} />
 
-      <TouchableOpacity onPress={handleSubmit} style={{ backgroundColor: '#6c5ce7', padding: 12, borderRadius: 8, marginBottom: 10 }}>
-        <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>Güncelle</Text>
+      <TouchableOpacity onPress={handleSubmit} style={styles.updateButton}>
+        <Text style={styles.updateButtonText}>Güncelle</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleDelete} style={{ backgroundColor: '#d63031', padding: 12, borderRadius: 8 }}>
-        <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>Etkinliği Sil</Text>
+      <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+        <Text style={styles.deleteButtonText}>Etkinliği Sil</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { padding: 16 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
+  input: { borderWidth: 1, padding: 8, marginBottom: 12 },
+  preview: { width: '100%', height: 220, borderRadius: 12, marginBottom: 12 },
+  updateButton: {
+    backgroundColor: '#6c5ce7',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  updateButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  deleteButton: { backgroundColor: '#d63031', padding: 12, borderRadius: 8 },
+  deleteButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+});
