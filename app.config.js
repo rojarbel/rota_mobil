@@ -25,8 +25,8 @@ export default {
 extra: {
   apiUrl: process.env.API_URL,
   eas: {
-    projectId: "12796067-0fe6-4c30-aed1-3c989a949321"
-  }             
+    projectId: "7c8d246c-100b-4e00-a19e-0f2be95e9e6b"
+  }
 },
     runtimeVersion: {
       policy: 'appVersion'
